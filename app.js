@@ -5,6 +5,11 @@
   var STORE_KEY = 'mycel-quiz-v1';
   var MAX_AGE = 8 * 60 * 60 * 1000; // sparade svar glöms efter 8 timmar
 
+  // Statistik via GoatCounter (gratis, utan cookies). Skapa ett konto på goatcounter.com och
+  // skriv in din kod här, t.ex. 'mycel' för mycel.goatcounter.com. Tom kod = ingen räkning.
+  var GOATCOUNTER = 'christiansandberg';
+  var STATS_KEY = 'mycel-stats-v1';
+
   var ids = QUIZ.map(function (q) { return q.id; });
   var byId = {};
   QUIZ.forEach(function (q) { byId[q.id] = q; });
@@ -47,6 +52,20 @@
     } catch (e) {}
   }
   function clearSaved() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
+
+  /* ---------- Statistik: varje webbläsare räknas högst en gång per händelse ---------- */
+  // 'svarat' = valt ett svar på minst en fråga, 'klarat' = alla rätt
+  function track(event) {
+    if (!GOATCOUNTER) return;
+    var done = {};
+    try { done = JSON.parse(localStorage.getItem(STATS_KEY) || '{}') || {}; } catch (e) {}
+    if (done[event]) return;
+    done[event] = 1;
+    try { localStorage.setItem(STATS_KEY, JSON.stringify(done)); } catch (e) {}
+    new Image().src = 'https://' + GOATCOUNTER + '.goatcounter.com/count?e=true&p=' +
+      encodeURIComponent('quiz-' + event) + '&t=' + encodeURIComponent('Quiz ' + event) +
+      '&rnd=' + Math.random().toString(36).slice(2);
+  }
 
   /* ---------- Bygg rutorna ---------- */
   QUIZ.forEach(function (q, i) {
@@ -182,6 +201,7 @@
   function choose(id, idx) {
     if (closing) return;
     state.choices[id] = idx;
+    track('svarat');
     delete state.results[id]; // ändrat svar måste kontrolleras igen
     save();
     Array.prototype.forEach.call(optionsEl.children, function (b, i) {
@@ -206,6 +226,7 @@
       QUIZ.forEach(function (q) { r[q.id] = state.choices[q.id] === q.answer; });
       state.results = r;
       state.busy = false;
+      if (ids.every(function (id) { return r[id]; })) track('klarat');
       save();
       render();
       window.scrollTo({ top: 0, behavior: 'smooth' });
