@@ -1,4 +1,4 @@
-// Frågor och facit för Professor Mycels Biolab. Redigera här.
+// Frågor och facit för Professor Mycels Biolabb. Redigera här.
 //
 //  id        unikt namn (bokstäver utan mellanslag)
 //  title     stationens namn

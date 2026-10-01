@@ -1,4 +1,11 @@
 @font-face {
+  font-family: "Boogaloo";
+  src: url("assets/fonts/Boogaloo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
   font-family: "GFY Woodward";
   src: url("assets/fonts/GFY-Woodward.otf") format("opentype");
   font-weight: 400;
@@ -27,6 +34,7 @@
   --sun-hi: #f7d35a;
   --ok: #2c6a1b;
   --bad: #b32a16;
+  --heading: "Boogaloo", "GFY Woodward", "Arial Narrow", Impact, sans-serif;
   --display: "GFY Woodward", "Arial Narrow", Impact, sans-serif;
   --hand: "GFY Kersti", "Marker Felt", "Comic Sans MS", cursive;
   --script: "GFY Marcie", "Snell Roundhand", cursive;
@@ -68,10 +76,9 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
 /* Rubriktext i skyltarnas tjocka handstil */
 .display {
-  font-family: var(--display);
+  font-family: var(--heading);
   font-weight: 400;
   text-transform: uppercase;
-  -webkit-text-stroke: .035em currentColor;
 }
 
 .app {
