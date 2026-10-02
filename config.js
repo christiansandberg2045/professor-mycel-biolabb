@@ -6,7 +6,7 @@ window.PRIZE = {
   endpoint: 'https://script.google.com/macros/s/AKfycbz6vBZ8ZM6Xf6o2hOtDT6RT9xgDpDp7HZluLaX8U2pqn6_QA82QruSvfAWm8nOk1Axn/exec',
 
   // Sekunder som "Alla rätt!" och korten visas innan formuläret tar över
-  delaySeconds: 5,
+  delaySeconds: 2,
 
   title: 'Vinn ett årskort!',
   intro: 'Fyll i en vuxens e-postadress så har du chans att vinna ett årskort till Universeum.',
