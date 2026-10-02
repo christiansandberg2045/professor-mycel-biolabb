@@ -37,7 +37,34 @@
     </div>
   </div>
 
-  <main class="note"><div class="grid" id="grid"></div></main>
+  <main class="note">
+    <div class="grid" id="grid"></div>
+
+    <section class="prize" id="prize" aria-labelledby="prizeTitle" hidden>
+      <h2 class="prize-title display" id="prizeTitle" tabindex="-1"></h2>
+      <p class="prize-intro" id="prizeIntro"></p>
+      <form id="prizeForm" novalidate>
+        <label class="field" for="email">E-postadress</label>
+        <input class="email" id="email" name="email" type="email" inputmode="email" autocomplete="email"
+               autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="254" placeholder="namn@exempel.se">
+        <div class="hp" aria-hidden="true"><label>Lämna tomt <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <label class="consent">
+          <input type="checkbox" id="consent">
+          <span class="box" aria-hidden="true"></span>
+          <span id="consentText"></span>
+        </label>
+        <p class="privacy" id="privacyNote"></p>
+        <p class="privacy privacy-more" id="privacyMore"><span id="privacyMoreText"></span> <a id="privacyLink" target="_blank" rel="noopener noreferrer"></a>.</p>
+        <p class="form-error" id="formError" role="alert" hidden></p>
+        <button class="send display" id="send" type="submit" disabled>Skicka</button>
+      </form>
+      <button class="skip" id="skip" type="button">Nej tack</button>
+    </section>
+
+    <section class="thanks" id="thanks" hidden>
+      <p class="thanks-text display" id="thanksText" tabindex="-1"></p>
+    </section>
+  </main>
 
   <button class="reset" id="reset" type="button" hidden>Börja om</button>
 </div>
@@ -59,6 +86,7 @@
 </div>
 
 <script src="quiz.js"></script>
+<script src="config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -208,6 +208,105 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
   text-underline-offset: 5px;
 }
 
+/* ---------- Utlottning: formulär och tack ---------- */
+.grid.leaving { opacity: 0; transition: opacity .35s ease; }
+
+.prize, .thanks { padding: 4px 4px 2px; text-align: center; animation: fadein .45s ease both; }
+.prize-title { margin: 2px 0 0; font-size: clamp(32px, 9.5vw, 42px); line-height: 1; }
+.prize-title:focus { outline: none; }
+.prize-intro { margin: 10px 0 0; font-size: 23px; line-height: 1.2; }
+.prize form { margin-top: 18px; text-align: left; }
+
+.field { display: block; margin: 0 0 6px 2px; font-size: 20px; line-height: 1; }
+.email {
+  display: block;
+  width: 100%;
+  height: 58px;
+  padding: 0 14px;
+  border: 2.5px solid var(--ink);
+  border-radius: var(--box);
+  background: rgba(255, 253, 246, .88);
+  box-shadow: 0 3px 0 rgba(28, 23, 13, .85);
+  color: var(--ink);
+  font: 500 20px/1 system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+.email::placeholder { color: rgba(28, 23, 13, .4); }
+.email:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+/* Dold fälla för robotar – riktiga besökare ser den aldrig */
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.consent {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 18px;
+  font-size: 20px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+.consent input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.consent .box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-top: 1px;
+  border: 2.5px solid var(--ink);
+  border-radius: 9px 6px 10px 7px / 7px 10px 6px 9px;
+  background: rgba(255, 253, 246, .88);
+  transition: background .15s;
+}
+.consent .box::after {
+  content: "";
+  width: 16px;
+  height: 8px;
+  border-left: 4px solid var(--ink);
+  border-bottom: 4px solid var(--ink);
+  transform: rotate(-45deg) translate(1px, -2px);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.consent input:checked + .box { background: var(--sun-hi); }
+.consent input:checked + .box::after { opacity: 1; }
+.consent input:focus-visible + .box { outline: 3px solid var(--ink); outline-offset: 3px; }
+
+.privacy { margin: 10px 0 0 44px; font-size: 16px; line-height: 1.2; color: #4a3d1f; }
+.privacy-more { margin-top: 6px; }
+.privacy a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.privacy a:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.form-error { margin: 12px 0 0; font-size: 19px; line-height: 1.15; color: var(--bad); }
+
+.send {
+  display: block;
+  width: 100%;
+  height: 64px;
+  margin-top: 16px;
+  border-radius: var(--box);
+  background: var(--ink);
+  color: #fff;
+  font-size: 30px;
+  letter-spacing: .06em;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .35);
+  transition: transform .08s, box-shadow .08s, opacity .15s;
+}
+.send:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, .35); }
+.send:disabled { opacity: .4; cursor: default; box-shadow: none; }
+
+.skip {
+  display: block;
+  margin: 12px auto 0;
+  padding: 10px 14px;
+  font-size: 20px;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.thanks { padding: 34px 6px 14px; }
+.thanks-text { margin: 0; font-size: clamp(32px, 9.5vw, 42px); line-height: 1.05; }
+.thanks-text:focus { outline: none; }
+
 /* ---------- Kontrollera-knapp ---------- */
 .dock {
   position: fixed;
@@ -327,6 +426,7 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
 @keyframes pop { 50% { scale: 1.07 } }
 @keyframes nudge { 0%, 88%, 100% { scale: 1 } 94% { scale: 1.03 } }
 @keyframes stamp { 0% { scale: 1.12; opacity: .6 } 100% { scale: 1; opacity: 1 } }
+@keyframes fadein { from { opacity: 0; translate: 0 8px } to { opacity: 1; translate: 0 0 } }
 .grid.complete .tile { animation: stamp .35s both; animation-delay: calc(var(--i) * 90ms); }
 
 @media (prefers-reduced-motion: reduce) {

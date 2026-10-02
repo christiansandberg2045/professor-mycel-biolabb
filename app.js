@@ -15,7 +15,12 @@
   QUIZ.forEach(function (q) { byId[q.id] = q; });
 
   // choices: vilket alternativ som är valt per uppgift. results: true/false efter kontroll.
-  var state = { choices: {}, results: {}, busy: false };
+  // stage: var man är i utlottningen efter "Alla rätt" ('' = korten visas, 'form', 'sent', 'skipped')
+  var state = { choices: {}, results: {}, busy: false, stage: '', sending: false };
+
+  // Utlottning (config.js). Utan adress till brevlådan visas ingen utlottning.
+  var PRIZE = window.PRIZE || {};
+  var prizeOn = !!PRIZE.endpoint;
   var openId = null;
   var closing = false;
   var lastFocus = null;
@@ -24,6 +29,7 @@
   function $(id) { return document.getElementById(id); }
   var grid = $('grid'), hint = $('hint'), verdict = $('verdict'), dock = $('dock'), check = $('check');
   var resetBtn = $('reset'), picker = $('picker'), optionsEl = $('options');
+  var emailInput = $('email'), consentBox = $('consent'), sendBtn = $('send'), formError = $('formError');
 
   /* ---------- Hjälpfunktioner för alternativtext ("FÖR ATT *VÄRD*") ---------- */
   function parts(text) { return text.split('*'); }
@@ -35,7 +41,8 @@
 
   /* ---------- Spara så att svaren finns kvar om sidan laddas om ---------- */
   function save() {
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ t: Date.now(), c: state.choices, r: state.results })); } catch (e) {}
+    // E-postadressen sparas aldrig på telefonen – bara hur långt man har kommit
+    try { localStorage.setItem(STORE_KEY, JSON.stringify({ t: Date.now(), c: state.choices, r: state.results, s: state.stage })); } catch (e) {}
   }
   function load() {
     try {
@@ -49,6 +56,7 @@
           if (d.r && typeof d.r[q.id] === 'boolean') state.results[q.id] = c === q.answer;
         }
       });
+      if (d.s === 'form' || d.s === 'sent' || d.s === 'skipped') state.stage = d.s;
     } catch (e) {}
   }
   function clearSaved() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
@@ -145,7 +153,22 @@
     dock.classList.toggle('show', allChosen && !checked);
     check.disabled = state.busy;
     check.textContent = state.busy ? '…' : 'Kontrollera';
-    resetBtn.hidden = !allOk;
+
+    // Utlottning: efter några sekunder byts korten mot formuläret, och sedan mot ett tack
+    var stage = prizeOn && allOk ? state.stage : '';
+    var inForm = stage === 'form', inEnd = stage === 'sent' || stage === 'skipped';
+    grid.hidden = inForm || inEnd;
+    if (!inForm && !inEnd) grid.classList.remove('leaving');
+    $('prize').hidden = !inForm;
+    $('thanks').hidden = !inEnd;
+    if (inEnd) $('thanksText').textContent = stage === 'sent' ? PRIZE.thanks : PRIZE.thanksNoEntry;
+    resetBtn.hidden = !allOk || (prizeOn && !inEnd);
+    if (prizeOn && allOk && !state.stage) {
+      if (!prizeTimer && !prizeFading) prizeTimer = setTimeout(showForm, (PRIZE.delaySeconds || 5) * 1000);
+    } else if (prizeTimer) {
+      clearTimeout(prizeTimer);
+      prizeTimer = null;
+    }
   }
 
   /* ---------- Välj ord ---------- */
@@ -203,6 +226,7 @@
     state.choices[id] = idx;
     track('svarat');
     delete state.results[id]; // ändrat svar måste kontrolleras igen
+    state.stage = '';
     save();
     Array.prototype.forEach.call(optionsEl.children, function (b, i) {
       b.setAttribute('aria-pressed', i === idx ? 'true' : 'false');
@@ -233,6 +257,84 @@
     }, 350);
   }
 
+  /* ---------- Utlottning: e-postadress skickas till brevlådan (Apps Script -> kalkylblad) ---------- */
+  var prizeTimer = null, prizeFading = false;
+
+  // Samma regler som i brevlådan: något@domän.xx, inga mellanslag, och inget som kan tolkas som formel
+  function emailOk(v) {
+    return v.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) && !/^[=+\-@]/.test(v);
+  }
+  function setError(msg) { formError.textContent = msg || ''; formError.hidden = !msg; }
+  function updateSend() {
+    sendBtn.disabled = state.sending || !(consentBox.checked && emailOk(emailInput.value.trim()));
+    sendBtn.textContent = state.sending ? 'Skickar…' : 'Skicka';
+  }
+  function resetForm() {
+    emailInput.value = '';
+    $('website').value = '';
+    consentBox.checked = false;
+    state.sending = false;
+    setError('');
+    updateSend();
+  }
+
+  function showForm() {
+    prizeTimer = null;
+    prizeFading = true;
+    grid.classList.add('leaving'); // korten tonas ut, sedan tar formuläret över
+    setTimeout(function () {
+      prizeFading = false;
+      if (state.stage) return; // något annat har hunnit hända under tiden
+      state.stage = 'form';
+      save();
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      $('prizeTitle').focus({ preventScroll: true });
+    }, 380);
+  }
+
+  function finish(stage) {
+    state.stage = stage;
+    resetForm();
+    save();
+    render();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    $('thanksText').focus({ preventScroll: true });
+  }
+
+  function sendEntry() {
+    if (state.sending) return;
+    var email = emailInput.value.trim();
+    if (!consentBox.checked || !emailOk(email)) { updateSend(); return; }
+    state.sending = true;
+    setError('');
+    updateSend();
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timeout = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+    function failed() {
+      state.sending = false;
+      updateSend();
+      setError('Något gick fel. Kontrollera nätet och försök igen.');
+    }
+
+    fetch(PRIZE.endpoint, {
+      method: 'POST',
+      // text/plain gör att webbläsaren skickar direkt utan förfrågan i förväg (Apps Script klarar inte den)
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ email: email, consent: true, consentText: PRIZE.consent, website: $('website').value }),
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (res) {
+        if (!res || res.ok !== true) throw new Error('server');
+        track('epost');
+        finish('sent');
+      })
+      .catch(failed)
+      .then(function () { clearTimeout(timeout); });
+  }
+
   /* ---------- Börja om (två tryck så det inte sker av misstag) ---------- */
   var armed = false, armTimer = null;
   function disarm() { armed = false; resetBtn.textContent = 'Börja om'; }
@@ -247,7 +349,9 @@
     disarm();
     state.choices = {};
     state.results = {};
+    state.stage = '';
     clearSaved();
+    resetForm();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -257,6 +361,32 @@
   $('close').addEventListener('click', closePicker);
   picker.addEventListener('click', function (e) { if (e.target === picker) closePicker(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePicker(); });
+
+  $('prizeForm').addEventListener('submit', function (e) { e.preventDefault(); sendEntry(); });
+  $('prizeForm').addEventListener('input', updateSend);
+  $('prizeForm').addEventListener('change', updateSend);
+  emailInput.addEventListener('blur', function () {
+    var v = emailInput.value.trim();
+    if (v && !emailOk(v)) setError('Kontrollera e-postadressen.');
+  });
+  emailInput.addEventListener('input', function () {
+    if (!formError.hidden && emailOk(emailInput.value.trim())) setError('');
+  });
+  $('skip').addEventListener('click', function () { finish('skipped'); });
+
+  if (prizeOn) {
+    $('prizeTitle').textContent = PRIZE.title;
+    $('prizeIntro').textContent = PRIZE.intro;
+    $('consentText').textContent = PRIZE.consent;
+    $('privacyNote').textContent = PRIZE.privacy;
+    if (PRIZE.privacyUrl) {
+      $('privacyMoreText').textContent = PRIZE.privacyMore;
+      $('privacyLink').textContent = PRIZE.privacyLinkText;
+      $('privacyLink').href = PRIZE.privacyUrl;
+    } else {
+      $('privacyMore').hidden = true;
+    }
+  }
 
   load();
   render();
