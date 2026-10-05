@@ -1,10 +1,13 @@
 // Texter och inställningar. Redigera här.
 
 // Kort introduktion som visas när man öppnar sidan första gången
-// (och när man trycker på ? uppe till höger). Finns på svenska, danska och norska.
+// (och när man trycker på ? uppe till höger). Finns på svenska, danska, norska och engelska.
 // Första språket är standard. Besökare vars telefon är inställd på danska eller norska
-// får det språket direkt, och valet av språk kommer ihåg på telefonen.
+// får det språket direkt, och valet av språk kommer ihåg på telefonen. Engelska väljs
+// aldrig automatiskt (många svenska telefoner står på engelska) – man trycker på språket.
 //   title = den stora texten, lead = frågan, more = raden under strecket.
+// Språket som väljs här styr också uppgifterna (översättningarna ligger i quiz.js):
+//   infoLabel = namnet på i-knappen, noteTitle/noteClose = rutan med professorns anteckning.
 window.INTRO = {
   sv: {
     label: 'Svenska',
@@ -18,14 +21,30 @@ window.INTRO = {
     title: 'Hjælp professor Mycel med at afslutte sine notater.',
     lead: 'Hvilke ord mangler i de seks eksperimenter?',
     more: 'Har du brug for mere information, kan du læse på den store tavle på væggen.',
-    button: 'Start'
+    button: 'Start',
+    infoLabel: 'Oversættelse',
+    noteTitle: 'Professorens notater',
+    noteClose: 'Luk'
   },
   no: {
     label: 'Norsk',
     title: 'Hjelp professor Mycel med å avslutte notatene sine.',
     lead: 'Hvilke ord mangler i de seks eksperimentene?',
     more: 'Trenger du mer informasjon, kan du lese på den store tavlen på veggen.',
-    button: 'Start'
+    button: 'Start',
+    infoLabel: 'Oversettelse',
+    noteTitle: 'Professorens notater',
+    noteClose: 'Lukk'
+  },
+  en: {
+    label: 'English',
+    title: 'Help professor Mycel complete the notes.',
+    lead: 'Which words are missing in the six experiments?',
+    more: 'Need more information? Read the big board on the wall.',
+    button: 'Start',
+    infoLabel: 'Translation',
+    noteTitle: "The professor's notes",
+    noteClose: 'Close'
   }
 };
 

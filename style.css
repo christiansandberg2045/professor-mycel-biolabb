@@ -514,6 +514,68 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
 }
 .close svg { width: 24px; height: 24px; }
 
+/* i-knappen (översättning av professorns anteckning) – sitter mitt emot stäng-knappen */
+.info {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 44px;
+  height: 44px;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  background: rgba(255, 253, 246, .75);
+  box-shadow: 0 3px 0 rgba(28, 23, 13, .85);
+  font-family: var(--heading);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink);
+}
+.info:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(28, 23, 13, .85); }
+
+/* Översatt rubrik: översättningen stor, den svenska rubriken i parentes under */
+.p-title.tr { font-size: clamp(24px, 7.6vw, 32px); }
+.p-title .t-main { display: block; }
+.p-title .t-sv { display: block; margin-top: 6px; font-size: .58em; opacity: .75; letter-spacing: .02em; }
+.opt .sv { font-size: 19px; opacity: .8; letter-spacing: .02em; }
+
+/* Professorns anteckning, översatt */
+.noteview {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  padding: 16px;
+  overflow-y: auto;
+  background: rgba(28, 23, 13, .7);
+  opacity: 0;
+  transition: opacity .25s;
+}
+.noteview.open { opacity: 1; }
+.noteview-card {
+  position: relative;
+  margin: auto;
+  width: 100%;
+  max-width: 440px;
+  padding: 24px 20px 18px;
+  background: #f1e8d4 url("assets/img/paper.jpg") 50% 30% / 760px auto no-repeat;
+  box-shadow: 6px 10px 18px rgba(0, 0, 0, .4);
+  transform: rotate(-.8deg) translateY(14px);
+  transition: transform .3s ease;
+}
+.noteview.open .noteview-card { transform: rotate(-.8deg); }
+.nv-title { margin: 0 0 14px; font-size: 28px; line-height: 1; text-align: center; }
+.nv-text p { margin: 0 0 10px; font-size: 23px; line-height: 1.18; }
+.nv-sign { margin: 14px 4px 0 0; text-align: right; font-family: var(--script); font-size: 26px; line-height: 1; }
+.noteview .cta { margin-top: 16px; max-width: none; position: sticky; bottom: 0; z-index: 2; }
+@media (max-width: 380px), (max-height: 720px) {
+  .noteview { padding: 10px; }
+  .noteview-card { padding: 18px 16px 14px; }
+  .nv-title { font-size: 24px; margin-bottom: 10px; }
+  .nv-text p { font-size: 20px; margin-bottom: 8px; }
+  .nv-sign { font-size: 22px; margin-top: 8px; }
+  .noteview .cta { height: 56px; margin-top: 12px; font-size: 28px; }
+}
+
 .p-sym { display: block; height: min(96px, 14vh); max-width: 60%; margin: 0 auto; object-fit: contain; }
 .p-title { margin: 8px 0 0; font-size: clamp(26px, 8.4vw, 36px); line-height: 1; text-wrap: balance; }
 .p-question {

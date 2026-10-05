@@ -28,6 +28,8 @@
   if (INTRO && INTRO.title) INTRO = { sv: Object.assign({ label: 'Svenska' }, INTRO) };
   var INTRO_KEY = 'mycel-intro-v1';
   var LANG_KEY = 'mycel-lang-v1';
+  var BASE_LANG = 'sv';     // originalspråket i quiz.js
+  var appLang = BASE_LANG;  // språket besökaren har valt (styr intro och uppgifter)
   var openId = null;
   var closing = false;
   var lastFocus = null;
@@ -44,6 +46,8 @@
     return parts(text).filter(function (s, i) { return i % 2 === 1 && s; }).join(' ');
   }
   function tileWord(text) { return keyWords(text) || text; }
+  // Översättning av en uppgift till valt språk (null = svenska: då visas originaltexterna)
+  function tr(q) { return appLang === BASE_LANG ? null : ((q.i18n && q.i18n[appLang]) || null); }
   function symbolUrl(q) { return 'assets/img/symbols/' + q.symbol + '.png'; }
 
   /* ---------- Spara så att svaren finns kvar om sidan laddas om ---------- */
@@ -194,23 +198,58 @@
     closing = false;
     lastFocus = document.activeElement;
 
+    var T = tr(q); // översättning till valt språk, eller null för svenska
     $('pSym').src = symbolUrl(q);
-    $('pTitle').textContent = q.title;
-    $('pQuestion').textContent = q.question;
+
+    // Rubrik: översättningen, med den svenska rubriken i parentes under
+    var title = $('pTitle');
+    title.textContent = '';
+    title.classList.toggle('tr', !!T);
+    if (T) {
+      var main = document.createElement('span');
+      main.className = 't-main';
+      main.textContent = T.title;
+      var sv = document.createElement('span');
+      sv.className = 't-sv';
+      sv.textContent = '(' + q.title + ')';
+      title.appendChild(main);
+      title.appendChild(sv);
+    } else {
+      title.textContent = q.title;
+    }
+    // Fråga: bara översättningen
+    $('pQuestion').textContent = T ? T.question : q.question;
+
+    // i-knappen (professorns anteckning översatt) finns bara när det finns en översättning
+    var hasNote = !!(T && T.note && T.note.length);
+    $('pInfo').hidden = !hasNote;
+    if (hasNote) $('pInfo').setAttribute('aria-label', (INTRO[appLang] && INTRO[appLang].infoLabel) || 'Info');
 
     optionsEl.textContent = '';
     q.options.forEach(function (text, idx) {
+      var translated = T && T.options && T.options[idx];
+      var shown = translated || text;
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'opt';
-      var hasKey = !!keyWords(text);
+      var hasKey = !!keyWords(shown);
       if (hasKey) b.classList.add('has-key');
-      parts(text).forEach(function (s, i) {
+      parts(shown).forEach(function (s, i) {
         if (!s) return;
         var n = document.createElement(i % 2 ? 'b' : 'span');
         n.textContent = s;
         b.appendChild(n);
       });
+      // Det svenska ordet i parentes, så att man kan matcha det mot ordet under luckan
+      if (translated) {
+        var svWord = keyWords(text) || text;
+        if (shown.replace(/\*/g, '').toUpperCase() !== svWord.toUpperCase()) {
+          var s = document.createElement('span');
+          s.className = 'sv';
+          s.textContent = '(' + svWord + ')';
+          b.appendChild(s);
+        }
+      }
       b.setAttribute('aria-pressed', state.choices[id] === idx ? 'true' : 'false');
       b.addEventListener('click', function () { choose(id, idx); });
       optionsEl.appendChild(b);
@@ -409,7 +448,6 @@
   /* ---------- Introduktion: kort förklaring när man öppnar sidan (svenska, danska, norska) ---------- */
   var introEl = $('intro');
   var introOpen = false;
-  var introLang = '';
 
   // Språk: det man valt sist, annars telefonens språk (danska/norska), annars det första i config.js
   function pickLang() {
@@ -427,7 +465,7 @@
   function renderIntro(lang) {
     var t = INTRO[lang];
     if (!t) return;
-    introLang = lang;
+    appLang = lang;
     $('introNote').lang = lang;
     $('introTitle').textContent = t.title;
     $('introLead').textContent = t.lead;
@@ -481,6 +519,42 @@
     }, 280);
   }
 
+  /* ---------- Professorns anteckning, översatt (i-knappen i en uppgift) ---------- */
+  var noteEl = $('noteview');
+  var noteOpen = false;
+  var noteFocus = null;
+  function openNote() {
+    var q = byId[openId];
+    var T = q && tr(q);
+    if (!T || !T.note || noteOpen) return;
+    var L = INTRO[appLang] || {};
+    noteOpen = true;
+    noteFocus = document.activeElement;
+    noteEl.lang = appLang;
+    $('nvTitle').textContent = L.noteTitle || '';
+    var box = $('nvText');
+    box.textContent = '';
+    T.note.forEach(function (line) {
+      var p = document.createElement('p');
+      p.textContent = line;
+      box.appendChild(p);
+    });
+    $('nvClose').textContent = L.noteClose || 'OK';
+    noteEl.hidden = false;
+    void noteEl.offsetWidth; // gör att inglidningen startar
+    noteEl.classList.add('open');
+    $('nvClose').focus({ preventScroll: true });
+  }
+  function closeNote() {
+    if (!noteOpen) return;
+    noteOpen = false;
+    noteEl.classList.remove('open');
+    setTimeout(function () {
+      noteEl.hidden = true;
+      if (noteFocus && noteFocus.focus) noteFocus.focus({ preventScroll: true });
+    }, 250);
+  }
+
   /* ---------- Börja om (två tryck så det inte sker av misstag) ---------- */
   var armed = false, armTimer = null;
   function disarm() { armed = false; resetBtn.textContent = 'Börja om'; }
@@ -509,7 +583,10 @@
   $('close').addEventListener('click', closePicker);
   picker.addEventListener('click', function (e) { if (e.target === picker) closePicker(); });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { closePicker(); closeIntro(); }
+    if (e.key !== 'Escape') return;
+    if (noteOpen) { closeNote(); return; }
+    closePicker();
+    closeIntro();
   });
 
   $('prizeForm').addEventListener('submit', function (e) { e.preventDefault(); sendEntry(); });
@@ -533,6 +610,10 @@
   });
   $('fbSend').addEventListener('click', sendFeedback);
   $('fbSkip').addEventListener('click', function () { resetFeedback(); go('done'); });
+
+  $('pInfo').addEventListener('click', openNote);
+  $('nvClose').addEventListener('click', closeNote);
+  noteEl.addEventListener('click', function (e) { if (e.target === noteEl) closeNote(); });
 
   $('help').addEventListener('click', openIntro);
   $('introGo').addEventListener('click', closeIntro);
