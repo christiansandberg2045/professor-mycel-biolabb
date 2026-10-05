@@ -37,7 +37,7 @@ window.PRIZE = {
   // Kräver att brevlådans skript är uppdaterat till den version som tar emot feedback.
   feedback: {
     enabled: true,
-    title: 'Vad tyckte du?',
+    title: 'Vad tyckte du om Professor Mycels Biolabb?',
     faces: ['Inte bra', 'Okej', 'Jättebra'],
     commentLabel: 'Vill du berätta mer? (frivilligt)',
     note: 'Skriv inga namn eller kontaktuppgifter. Svaret sparas utan din e-postadress.',

@@ -212,7 +212,7 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
 .grid.leaving { opacity: 0; transition: opacity .35s ease; }
 
 .prize, .thanks { padding: 4px 4px 2px; text-align: center; animation: fadein .45s ease both; }
-.prize-title { margin: 2px 0 0; font-size: clamp(32px, 9.5vw, 42px); line-height: 1; }
+.prize-title { margin: 2px 0 0; font-size: clamp(32px, 9.5vw, 42px); line-height: 1; text-wrap: balance; }
 .prize-title:focus { outline: none; }
 .prize-intro { margin: 10px 0 0; font-size: 23px; line-height: 1.2; }
 .prize form { margin-top: 18px; text-align: left; }
