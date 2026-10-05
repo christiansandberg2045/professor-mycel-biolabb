@@ -518,7 +518,14 @@
     $('introGo').textContent = INTRO.button;
     INTRO.steps.forEach(function (s) {
       var li = document.createElement('li');
-      li.textContent = s;
+      var text = document.createElement('span');
+      parts(s).forEach(function (seg, i) {   // udda delar (mellan stjärnor) blir fetstil
+        if (!seg) return;
+        var n = document.createElement(i % 2 ? 'b' : 'span');
+        n.textContent = seg;
+        text.appendChild(n);
+      });
+      li.appendChild(text);
       $('introSteps').appendChild(li);
     });
   } else {

@@ -4,11 +4,12 @@
 // (och när man trycker på ? uppe till höger).
 window.INTRO = {
   title: 'Hjälp Professor Mycel!',
-  lead: 'Orden har försvunnit ur hans sista anteckningar. Hjälp honom hitta dem!',
+  lead: 'Orden har försvunnit ur professorns sista anteckningar. Vilka ord saknas?',
+  // *Stjärnor* runt ett ord gör det fetare, så att man ser stegets verb direkt.
   steps: [
-    'Titta noga och läs Mycels ledtrådar vid bordet.',
-    'Lyft luckan med rätt symbol. Bara en är rätt!',
-    'Tryck på symbolen här och välj ordet du hittade.'
+    '*Läs* ledtrådarna vid bordet.',
+    '*Lyft* luckan med rätt symbol.',
+    '*Tryck* på symbolen här och välj ordet.'
   ],
   more: 'Mer om professorns experiment finns på den stora tavlan på väggen.',
   button: 'Börja'
