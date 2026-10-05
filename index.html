@@ -18,6 +18,7 @@
 
 <div class="app">
   <header class="masthead">
+    <button class="help" id="help" type="button" aria-label="Så funkar det">?</button>
     <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
       <path d="M24 3C12.4 3 4 10.4 4 19.6c0 5.1 2.5 9.6 6.6 12.6L8.5 44l10.6-6c1.5.3 3.2.5 4.9.5 11.6 0 20-7.4 20-16.9S35.6 3 24 3z" fill="none" stroke="#1c170d" stroke-width="3.2" stroke-linejoin="round"/>
       <path d="M12.5 22.5c0-6.3 5-10.5 11.5-10.5s11.500 4.200 11.500 10.500z" fill="#1c170d"/>
@@ -61,6 +62,32 @@
       <button class="skip" id="skip" type="button">Nej tack</button>
     </section>
 
+    <section class="feedback" id="feedback" aria-labelledby="fbTitle" hidden>
+      <h2 class="prize-title display" id="fbTitle" tabindex="-1"></h2>
+      <div class="faces" id="faces" role="radiogroup" aria-labelledby="fbTitle">
+        <button class="face" type="button" role="radio" aria-checked="false" data-rating="1">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="17" cy="20" r="2.4" fill="currentColor"/><circle cx="31" cy="20" r="2.4" fill="currentColor"/><path d="M15 34q9-9 18 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          <span></span>
+        </button>
+        <button class="face" type="button" role="radio" aria-checked="false" data-rating="2">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="17" cy="20" r="2.4" fill="currentColor"/><circle cx="31" cy="20" r="2.4" fill="currentColor"/><path d="M16 32h16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          <span></span>
+        </button>
+        <button class="face" type="button" role="radio" aria-checked="false" data-rating="3">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="17" cy="20" r="2.4" fill="currentColor"/><circle cx="31" cy="20" r="2.4" fill="currentColor"/><path d="M14 28q10 11 20 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+          <span></span>
+        </button>
+      </div>
+      <div class="fb-more">
+        <label class="field" for="fbText" id="fbTextLabel"></label>
+        <textarea class="comment" id="fbText" rows="3" maxlength="500"></textarea>
+        <p class="privacy fb-note" id="fbNote"></p>
+        <p class="form-error" id="fbError" role="alert" hidden></p>
+        <button class="send display" id="fbSend" type="button" disabled>Skicka</button>
+      </div>
+      <button class="skip" id="fbSkip" type="button"></button>
+    </section>
+
     <section class="thanks" id="thanks" hidden>
       <p class="thanks-text display" id="thanksText" tabindex="-1"></p>
     </section>
@@ -82,6 +109,19 @@
     <h2 class="p-title display" id="pTitle"></h2>
     <p class="p-question" id="pQuestion"></p>
     <div class="options" id="options"></div>
+  </div>
+</div>
+
+<div class="intro" id="intro" hidden>
+  <div class="intro-note" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+    <img class="intro-prof" src="assets/img/professor.webp" alt="" width="247" height="680">
+    <div class="intro-body">
+      <h2 class="intro-title display" id="introTitle"></h2>
+      <p class="intro-lead" id="introLead"></p>
+      <ol class="steps" id="introSteps"></ol>
+    </div>
+    <p class="intro-more" id="introMore"></p>
+    <button class="cta display" id="introGo" type="button"></button>
   </div>
 </div>
 

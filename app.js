@@ -15,12 +15,16 @@
   QUIZ.forEach(function (q) { byId[q.id] = q; });
 
   // choices: vilket alternativ som är valt per uppgift. results: true/false efter kontroll.
-  // stage: var man är i utlottningen efter "Alla rätt" ('' = korten visas, 'form', 'sent', 'skipped')
-  var state = { choices: {}, results: {}, busy: false, stage: '', sending: false };
+  // stage: var man är efter "Alla rätt" ('' = korten visas, 'form' = e-post, 'feedback', 'done')
+  // entered: true om man skickade in sin e-postadress till utlottningen
+  var state = { choices: {}, results: {}, busy: false, stage: '', entered: false, sending: false };
 
-  // Utlottning (config.js). Utan adress till brevlådan visas ingen utlottning.
+  // Utlottning och feedback (config.js). Utan adress till brevlådan visas varken utlottning eller feedback.
   var PRIZE = window.PRIZE || {};
   var prizeOn = !!PRIZE.endpoint;
+  var FB = prizeOn && PRIZE.feedback && PRIZE.feedback.enabled ? PRIZE.feedback : null;
+  var INTRO = window.INTRO || null;
+  var INTRO_KEY = 'mycel-intro-v1';
   var openId = null;
   var closing = false;
   var lastFocus = null;
@@ -42,7 +46,11 @@
   /* ---------- Spara så att svaren finns kvar om sidan laddas om ---------- */
   function save() {
     // E-postadressen sparas aldrig på telefonen – bara hur långt man har kommit
-    try { localStorage.setItem(STORE_KEY, JSON.stringify({ t: Date.now(), c: state.choices, r: state.results, s: state.stage })); } catch (e) {}
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({
+        t: Date.now(), c: state.choices, r: state.results, s: state.stage, e: state.entered
+      }));
+    } catch (e) {}
   }
   function load() {
     try {
@@ -56,7 +64,10 @@
           if (d.r && typeof d.r[q.id] === 'boolean') state.results[q.id] = c === q.answer;
         }
       });
-      if (d.s === 'form' || d.s === 'sent' || d.s === 'skipped') state.stage = d.s;
+      if (d.s === 'form' || d.s === 'feedback' || d.s === 'done') state.stage = d.s;
+      else if (d.s === 'sent') { state.stage = 'done'; state.entered = true; }  // äldre sparat läge
+      else if (d.s === 'skipped') state.stage = 'done';                         // äldre sparat läge
+      if (d.e) state.entered = true;
     } catch (e) {}
   }
   function clearSaved() { try { localStorage.removeItem(STORE_KEY); } catch (e) {} }
@@ -156,12 +167,14 @@
 
     // Utlottning: efter några sekunder byts korten mot formuläret, och sedan mot ett tack
     var stage = prizeOn && allOk ? state.stage : '';
-    var inForm = stage === 'form', inEnd = stage === 'sent' || stage === 'skipped';
-    grid.hidden = inForm || inEnd;
-    if (!inForm && !inEnd) grid.classList.remove('leaving');
+    var inForm = stage === 'form', inFb = stage === 'feedback', inEnd = stage === 'done';
+    var away = inForm || inFb || inEnd;
+    grid.hidden = away;
+    if (!away) grid.classList.remove('leaving');
     $('prize').hidden = !inForm;
+    $('feedback').hidden = !inFb;
     $('thanks').hidden = !inEnd;
-    if (inEnd) $('thanksText').textContent = stage === 'sent' ? PRIZE.thanks : PRIZE.thanksNoEntry;
+    if (inEnd) $('thanksText').textContent = state.entered ? PRIZE.thanks : PRIZE.thanksNoEntry;
     resetBtn.hidden = !allOk || (prizeOn && !inEnd);
     if (prizeOn && allOk && !state.stage) {
       if (!prizeTimer && !prizeFading) prizeTimer = setTimeout(showForm, (PRIZE.delaySeconds || 5) * 1000);
@@ -293,13 +306,19 @@
     }, 380);
   }
 
-  function finish(stage) {
+  // Går vidare i flödet: e-post -> feedback (om den är på) -> tack
+  function go(stage) {
     state.stage = stage;
-    resetForm();
     save();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    $('thanksText').focus({ preventScroll: true });
+    var target = stage === 'feedback' ? $('fbTitle') : $('thanksText');
+    if (target) target.focus({ preventScroll: true });
+  }
+  function afterEmail(entered) {
+    state.entered = entered;
+    resetForm();
+    go(FB ? 'feedback' : 'done');
   }
 
   function sendEntry() {
@@ -329,10 +348,87 @@
       .then(function (res) {
         if (!res || res.ok !== true) throw new Error('server');
         track('epost');
-        finish('sent');
+        afterEmail(true);
       })
       .catch(failed)
       .then(function () { clearTimeout(timeout); });
+  }
+
+  /* ---------- Feedback: ett tryck på ett ansikte + frivillig kommentar ---------- */
+  var fbRating = 0, fbSending = false;
+  var faceBtns = Array.prototype.slice.call(document.querySelectorAll('.face'));
+
+  function setFbError(msg) { $('fbError').textContent = msg || ''; $('fbError').hidden = !msg; }
+  function updateFb() {
+    if (!FB) return;
+    $('fbSend').disabled = fbSending || !fbRating;
+    $('fbSend').textContent = fbSending ? 'Skickar…' : FB.send;
+  }
+  function resetFeedback() {
+    fbRating = 0;
+    fbSending = false;
+    $('fbText').value = '';
+    faceBtns.forEach(function (b) { b.setAttribute('aria-checked', 'false'); });
+    setFbError('');
+    updateFb();
+  }
+  function sendFeedback() {
+    if (fbSending || !fbRating) return;
+    fbSending = true;
+    setFbError('');
+    updateFb();
+
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timeout = setTimeout(function () { if (ctrl) ctrl.abort(); }, 20000);
+    function failed() {
+      fbSending = false;
+      updateFb();
+      setFbError('Något gick fel. Försök igen, eller hoppa över.');
+    }
+
+    fetch(PRIZE.endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ type: 'feedback', rating: fbRating, comment: $('fbText').value.trim() }),
+      signal: ctrl ? ctrl.signal : undefined
+    })
+      .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+      .then(function (res) {
+        if (!res || res.ok !== true) throw new Error('server');
+        track('feedback');
+        resetFeedback();
+        go('done');
+      })
+      .catch(failed)
+      .then(function () { clearTimeout(timeout); });
+  }
+
+  /* ---------- Introduktion: kort förklaring när man öppnar sidan ---------- */
+  var introEl = $('intro');
+  var introOpen = false;
+  function introSeen() {
+    try { var t = +localStorage.getItem(INTRO_KEY); return !!t && Date.now() - t < MAX_AGE; } catch (e) { return false; }
+  }
+  function openIntro() {
+    if (!INTRO || introOpen) return;
+    introOpen = true;
+    lastFocus = document.activeElement;
+    introEl.hidden = false;
+    void introEl.offsetWidth; // gör att inglidningen startar
+    introEl.classList.add('open');
+    document.body.classList.add('locked');
+    $('introGo').focus({ preventScroll: true });
+  }
+  function closeIntro() {
+    if (!introOpen) return;
+    introOpen = false;
+    try { localStorage.setItem(INTRO_KEY, String(Date.now())); } catch (e) {}
+    introEl.classList.remove('open');
+    document.body.classList.remove('locked');
+    setTimeout(function () {
+      introEl.hidden = true;
+      if (lastFocus && lastFocus.focus) lastFocus.focus({ preventScroll: true });
+    }, 280);
   }
 
   /* ---------- Börja om (två tryck så det inte sker av misstag) ---------- */
@@ -350,8 +446,10 @@
     state.choices = {};
     state.results = {};
     state.stage = '';
+    state.entered = false;
     clearSaved();
     resetForm();
+    resetFeedback();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -360,7 +458,9 @@
   check.addEventListener('click', checkAnswers);
   $('close').addEventListener('click', closePicker);
   picker.addEventListener('click', function (e) { if (e.target === picker) closePicker(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePicker(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { closePicker(); closeIntro(); }
+  });
 
   $('prizeForm').addEventListener('submit', function (e) { e.preventDefault(); sendEntry(); });
   $('prizeForm').addEventListener('input', updateSend);
@@ -372,7 +472,21 @@
   emailInput.addEventListener('input', function () {
     if (!formError.hidden && emailOk(emailInput.value.trim())) setError('');
   });
-  $('skip').addEventListener('click', function () { finish('skipped'); });
+  $('skip').addEventListener('click', function () { afterEmail(false); });
+
+  faceBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      fbRating = +b.getAttribute('data-rating');
+      faceBtns.forEach(function (o) { o.setAttribute('aria-checked', o === b ? 'true' : 'false'); });
+      updateFb();
+    });
+  });
+  $('fbSend').addEventListener('click', sendFeedback);
+  $('fbSkip').addEventListener('click', function () { resetFeedback(); go('done'); });
+
+  $('help').addEventListener('click', openIntro);
+  $('introGo').addEventListener('click', closeIntro);
+  introEl.addEventListener('click', function (e) { if (e.target === introEl) closeIntro(); });
 
   if (prizeOn) {
     $('prizeTitle').textContent = PRIZE.title;
@@ -388,6 +502,33 @@
     }
   }
 
+  if (FB) {
+    $('fbTitle').textContent = FB.title;
+    $('fbTextLabel').textContent = FB.commentLabel;
+    $('fbNote').textContent = FB.note;
+    $('fbSkip').textContent = FB.skip;
+    faceBtns.forEach(function (b, i) { b.querySelector('span').textContent = FB.faces[i] || ''; });
+    updateFb();
+  }
+
+  if (INTRO) {
+    $('introTitle').textContent = INTRO.title;
+    $('introLead').textContent = INTRO.lead;
+    $('introMore').textContent = INTRO.more;
+    $('introGo').textContent = INTRO.button;
+    INTRO.steps.forEach(function (s) {
+      var li = document.createElement('li');
+      li.textContent = s;
+      $('introSteps').appendChild(li);
+    });
+  } else {
+    $('help').hidden = true;
+  }
+
   load();
   render();
+
+  // Visa introduktionen första gången – men inte för den som redan har börjat svara
+  var hasProgress = Object.keys(state.choices).length > 0;
+  if (INTRO && !hasProgress && !introSeen()) openIntro();
 })();
