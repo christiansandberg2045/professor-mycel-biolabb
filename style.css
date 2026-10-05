@@ -386,7 +386,22 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
   line-height: 1.2;
   color: #4a3d1f;
 }
-.intro .cta { grid-column: 1 / -1; margin-top: 14px; max-width: none; }
+/* Knappen följer med längst ner, så att den alltid syns även om kortet måste scrollas */
+.intro .cta { grid-column: 1 / -1; margin-top: 14px; max-width: none; position: sticky; bottom: 0; z-index: 2; }
+
+/* Kompaktare på små telefoner så att allt ryms utan scroll */
+@media (max-width: 380px), (max-height: 720px) {
+  .intro { padding: 10px; }
+  .intro-note { grid-template-columns: 80px 1fr; gap: 0 10px; padding: 16px 14px 14px; }
+  .intro-prof { width: 80px; }
+  .intro-title { font-size: 30px; }
+  .intro-lead { margin-top: 6px; font-size: 18px; }
+  .steps { margin-top: 10px; gap: 7px; }
+  .steps li { font-size: 17px; gap: 8px; }
+  .steps li::before { width: 26px; height: 26px; font-size: 19px; line-height: 27px; }
+  .intro-more { margin-top: 10px; padding-top: 8px; font-size: 15px; }
+  .intro .cta { height: 56px; margin-top: 10px; font-size: 28px; }
+}
 
 /* ---------- Feedback ---------- */
 .feedback { padding: 4px 4px 2px; text-align: center; animation: fadein .45s ease both; }

@@ -6,7 +6,7 @@ window.INTRO = {
   title: 'Hjälp Professor Mycel!',
   lead: 'Orden har försvunnit ur hans sista anteckningar. Hjälp honom hitta dem!',
   steps: [
-    'Gör experimentet vid bordet.',
+    'Titta noga och läs Mycels ledtrådar vid bordet.',
     'Lyft luckan med rätt symbol. Bara en är rätt!',
     'Tryck på symbolen här och välj ordet du hittade.'
   ],
