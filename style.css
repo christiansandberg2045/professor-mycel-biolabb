@@ -92,6 +92,7 @@ button:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .logo { width: 34px; height: 34px; display: block; margin: 0 auto 4px; }
 .kicker { margin: 0; font-size: 15px; letter-spacing: .24em; line-height: 1; }
 h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
+h1.long { font-size: clamp(30px, 11.2vw, 50px); } /* längre namn, t.ex. "Mycelium's biolab" */
 
 /* ---------- Status / resultat ---------- */
 .status {

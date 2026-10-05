@@ -18,15 +18,15 @@
 
 <div class="app">
   <header class="masthead">
-    <button class="help" id="help" type="button" aria-label="Så funkar det">?</button>
+    <button class="help" id="help" type="button" aria-label="Så funkar det" data-t-aria="help">?</button>
     <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
       <path d="M24 3C12.4 3 4 10.4 4 19.6c0 5.1 2.5 9.6 6.6 12.6L8.5 44l10.6-6c1.5.3 3.2.5 4.9.5 11.6 0 20-7.4 20-16.9S35.6 3 24 3z" fill="none" stroke="#1c170d" stroke-width="3.2" stroke-linejoin="round"/>
       <path d="M12.5 22.5c0-6.3 5-10.5 11.5-10.5s11.500 4.200 11.500 10.500z" fill="#1c170d"/>
       <path d="M20.500 22.500h7v5.500c0 1.300-1 2.200-2.300 2.200h-2.400c-1.300 0-2.300-.9-2.300-2.200z" fill="#1c170d"/>
       <circle cx="19" cy="18" r="1.700" fill="#e9bd36"/><circle cx="25.500" cy="16.200" r="1.500" fill="#e9bd36"/><circle cx="30" cy="19.800" r="1.300" fill="#e9bd36"/>
     </svg>
-    <p class="kicker display">Professor</p>
-    <h1 class="display">Mycels biolabb</h1>
+    <p class="kicker display" data-t="kicker">Professor</p>
+    <h1 class="display" data-t="name">Mycels biolabb</h1>
   </header>
 
   <div class="status" aria-live="polite">
@@ -34,7 +34,7 @@
     <div class="verdict" id="verdict" hidden>
       <p class="verdict-title display" id="verdictTitle"></p>
       <p class="verdict-sub" id="verdictSub"></p>
-      <p class="verdict-sign" id="verdictSign" hidden>– Professor Mycel</p>
+      <p class="verdict-sign" id="verdictSign" data-t="signature" hidden>– Professor Mycel</p>
     </div>
   </div>
 
@@ -42,28 +42,28 @@
     <div class="grid" id="grid"></div>
 
     <section class="prize" id="prize" aria-labelledby="prizeTitle" hidden>
-      <h2 class="prize-title display" id="prizeTitle" tabindex="-1"></h2>
-      <p class="prize-intro" id="prizeIntro"></p>
+      <h2 class="prize-title display" id="prizeTitle" data-t="prizeTitle" tabindex="-1"></h2>
+      <p class="prize-intro" id="prizeIntro" data-t="prizeIntro"></p>
       <form id="prizeForm" novalidate>
-        <label class="field" for="email">E-postadress</label>
+        <label class="field" for="email" data-t="emailLabel">E-postadress</label>
         <input class="email" id="email" name="email" type="email" inputmode="email" autocomplete="email"
-               autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="254" placeholder="namn@exempel.se">
+               autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="254" placeholder="namn@exempel.se" data-t-ph="emailPlaceholder">
         <div class="hp" aria-hidden="true"><label>Lämna tomt <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"></label></div>
         <label class="consent">
           <input type="checkbox" id="consent">
           <span class="box" aria-hidden="true"></span>
-          <span id="consentText"></span>
+          <span id="consentText" data-t="consent"></span>
         </label>
-        <p class="privacy" id="privacyNote"></p>
+        <p class="privacy" id="privacyNote" data-t="privacy"></p>
         <p class="privacy privacy-more" id="privacyMore"><span id="privacyMoreText"></span> <a id="privacyLink" target="_blank" rel="noopener noreferrer"></a>.</p>
         <p class="form-error" id="formError" role="alert" hidden></p>
         <button class="send display" id="send" type="submit" disabled>Skicka</button>
       </form>
-      <button class="skip" id="skip" type="button">Nej tack</button>
+      <button class="skip" id="skip" type="button" data-t="skip">Nej tack</button>
     </section>
 
     <section class="feedback" id="feedback" aria-labelledby="fbTitle" hidden>
-      <h2 class="prize-title display" id="fbTitle" tabindex="-1"></h2>
+      <h2 class="prize-title display" id="fbTitle" data-t="fbTitle" tabindex="-1"></h2>
       <div class="faces" id="faces" role="radiogroup" aria-labelledby="fbTitle">
         <button class="face" type="button" role="radio" aria-checked="false" data-rating="1">
           <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="17" cy="20" r="2.4" fill="currentColor"/><circle cx="31" cy="20" r="2.4" fill="currentColor"/><path d="M15 34q9-9 18 0" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
@@ -79,13 +79,13 @@
         </button>
       </div>
       <div class="fb-more">
-        <label class="field" for="fbText" id="fbTextLabel"></label>
+        <label class="field" for="fbText" id="fbTextLabel" data-t="fbComment"></label>
         <textarea class="comment" id="fbText" rows="3" maxlength="500"></textarea>
-        <p class="privacy fb-note" id="fbNote"></p>
+        <p class="privacy fb-note" id="fbNote" data-t="fbNote"></p>
         <p class="form-error" id="fbError" role="alert" hidden></p>
         <button class="send display" id="fbSend" type="button" disabled>Skicka</button>
       </div>
-      <button class="skip" id="fbSkip" type="button"></button>
+      <button class="skip" id="fbSkip" type="button" data-t="fbSkip"></button>
     </section>
 
     <section class="thanks" id="thanks" hidden>
@@ -103,7 +103,7 @@
 <div class="picker" id="picker" hidden>
   <div class="picker-note" role="dialog" aria-modal="true" aria-labelledby="pTitle">
     <button class="info" id="pInfo" type="button" aria-label="Info" hidden>i</button>
-    <button class="close" id="close" type="button" aria-label="Stäng">
+    <button class="close" id="close" type="button" aria-label="Stäng" data-t-aria="close">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" fill="none" stroke="#1c170d" stroke-width="3" stroke-linecap="round"/></svg>
     </button>
     <img class="p-sym" id="pSym" alt="">
@@ -117,14 +117,14 @@
   <div class="noteview-card" role="dialog" aria-modal="true" aria-labelledby="nvTitle">
     <h2 class="nv-title display" id="nvTitle"></h2>
     <div class="nv-text" id="nvText"></div>
-    <p class="nv-sign">– Professor Mycel</p>
+    <p class="nv-sign" data-t="signature">– Professor Mycel</p>
     <button class="cta display" id="nvClose" type="button"></button>
   </div>
 </div>
 
 <div class="intro" id="intro" hidden>
   <div class="intro-note" id="introNote" role="dialog" aria-modal="true" aria-labelledby="introTitle">
-    <div class="langs" id="langs" role="group" aria-label="Språk / Sprog"></div>
+    <div class="langs" id="langs" role="group" aria-label="Språk" data-t-aria="langGroup"></div>
     <img class="intro-prof" src="assets/img/professor.webp" alt="" width="247" height="680">
     <div class="intro-body">
       <h2 class="intro-title display" id="introTitle"></h2>

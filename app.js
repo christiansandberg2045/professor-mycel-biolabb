@@ -29,7 +29,17 @@
   var INTRO_KEY = 'mycel-intro-v1';
   var LANG_KEY = 'mycel-lang-v1';
   var BASE_LANG = 'sv';     // originalspråket i quiz.js
-  var appLang = BASE_LANG;  // språket besökaren har valt (styr intro och uppgifter)
+  var appLang = BASE_LANG;  // språket besökaren har valt (styr hela appen)
+
+  // Text på valt språk (config.js, window.TEXT). Saknas den används svenska.
+  var TEXT = window.TEXT || {};
+  function txt(key, vars) {
+    var L = TEXT[appLang];
+    var s = L && L[key] !== undefined ? L[key] : (TEXT[BASE_LANG] || {})[key];
+    if (typeof s !== 'string') return s === undefined ? '' : s;
+    if (vars) Object.keys(vars).forEach(function (k) { s = s.split('{' + k + '}').join(vars[k]); });
+    return s;
+  }
   var openId = null;
   var closing = false;
   var lastFocus = null;
@@ -45,7 +55,12 @@
   function keyWords(text) {
     return parts(text).filter(function (s, i) { return i % 2 === 1 && s; }).join(' ');
   }
-  function tileWord(text) { return keyWords(text) || text; }
+  // Ordet som visas på rutan när man valt: på valt språk (översättningen), annars svenska
+  function tileWord(q, idx) {
+    var T = tr(q);
+    var text = (T && T.options && T.options[idx]) || q.options[idx];
+    return keyWords(text) || text.replace(/\*/g, '');
+  }
   // Översättning av en uppgift till valt språk (null = svenska: då visas originaltexterna)
   function tr(q) { return appLang === BASE_LANG ? null : ((q.i18n && q.i18n[appLang]) || null); }
   function symbolUrl(q) { return 'assets/img/symbols/' + q.symbol + '.png'; }
@@ -138,7 +153,7 @@
 
     QUIZ.forEach(function (q) {
       var t = tiles[q.id], c = state.choices[q.id], r = state.results[q.id];
-      var w = c === undefined ? '' : tileWord(q.options[c]);
+      var w = c === undefined ? '' : tileWord(q, c);
       t.word.textContent = '';
       if (w) {
         var ink = document.createElement('span');
@@ -150,9 +165,10 @@
       t.el.classList.toggle('is-filled', c !== undefined);
       t.el.classList.toggle('is-ok', r === true);
       t.el.classList.toggle('is-bad', r === false);
+      var tq = tr(q);
       t.el.setAttribute('aria-label',
-        q.title + '. ' + (w ? 'Valt ord: ' + w : 'Inget ord valt') +
-        (r === true ? '. Rätt.' : r === false ? '. Fel.' : ''));
+        (tq ? tq.title : q.title) + '. ' + (w ? txt('ariaChosen') + ': ' + w : txt('ariaNone')) +
+        (r === true ? '. ' + txt('ariaRight') + '.' : r === false ? '. ' + txt('ariaWrong') + '.' : ''));
     });
     grid.classList.toggle('complete', allOk);
 
@@ -161,16 +177,16 @@
     hint.hidden = checked;
     if (checked) {
       verdict.classList.toggle('ok', allOk);
-      $('verdictTitle').textContent = allOk ? 'Alla rätt!' : correct + ' av ' + ids.length + ' rätt';
-      $('verdictSub').textContent = allOk ? 'Bra jobbat!' : 'Titta noga och byt de markerade.';
+      $('verdictTitle').textContent = allOk ? txt('allCorrect') : txt('someCorrect', { n: correct, total: ids.length });
+      $('verdictSub').textContent = allOk ? txt('wellDone') : txt('tryAgain');
       $('verdictSign').hidden = !allOk;
     } else {
-      hint.textContent = allChosen ? 'Alla ord valda' : 'Tryck på en symbol';
+      hint.textContent = allChosen ? txt('hintAll') : txt('hintStart');
     }
 
     dock.classList.toggle('show', allChosen && !checked);
     check.disabled = state.busy;
-    check.textContent = state.busy ? '…' : 'Kontrollera';
+    check.textContent = state.busy ? '…' : txt('check');
 
     // Utlottning: efter några sekunder byts korten mot formuläret, och sedan mot ett tack
     var stage = prizeOn && allOk ? state.stage : '';
@@ -181,7 +197,7 @@
     $('prize').hidden = !inForm;
     $('feedback').hidden = !inFb;
     $('thanks').hidden = !inEnd;
-    if (inEnd) $('thanksText').textContent = state.entered ? PRIZE.thanks : PRIZE.thanksNoEntry;
+    if (inEnd) $('thanksText').textContent = state.entered ? txt('thanks') : txt('thanksNoEntry');
     resetBtn.hidden = !allOk || (prizeOn && !inEnd);
     if (prizeOn && allOk && !state.stage) {
       if (!prizeTimer && !prizeFading) prizeTimer = setTimeout(showForm, (PRIZE.delaySeconds || 5) * 1000);
@@ -223,7 +239,7 @@
     // i-knappen (professorns anteckning översatt) finns bara när det finns en översättning
     var hasNote = !!(T && T.note && T.note.length);
     $('pInfo').hidden = !hasNote;
-    if (hasNote) $('pInfo').setAttribute('aria-label', (INTRO[appLang] && INTRO[appLang].infoLabel) || 'Info');
+    if (hasNote) $('pInfo').setAttribute('aria-label', txt('infoLabel'));
 
     optionsEl.textContent = '';
     q.options.forEach(function (text, idx) {
@@ -322,7 +338,7 @@
   function setError(msg) { formError.textContent = msg || ''; formError.hidden = !msg; }
   function updateSend() {
     sendBtn.disabled = state.sending || !(consentBox.checked && emailOk(emailInput.value.trim()));
-    sendBtn.textContent = state.sending ? 'Skickar…' : 'Skicka';
+    sendBtn.textContent = state.sending ? txt('sending') : txt('send');
   }
   function resetForm() {
     emailInput.value = '';
@@ -376,14 +392,14 @@
     function failed() {
       state.sending = false;
       updateSend();
-      setError('Något gick fel. Kontrollera nätet och försök igen.');
+      setError(txt('sendError'));
     }
 
     fetch(PRIZE.endpoint, {
       method: 'POST',
       // text/plain gör att webbläsaren skickar direkt utan förfrågan i förväg (Apps Script klarar inte den)
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ email: email, consent: true, consentText: PRIZE.consent, website: $('website').value }),
+      body: JSON.stringify({ email: email, consent: true, consentText: txt('consent'), website: $('website').value }),
       signal: ctrl ? ctrl.signal : undefined
     })
       .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
@@ -404,7 +420,7 @@
   function updateFb() {
     if (!FB) return;
     $('fbSend').disabled = fbSending || !fbRating;
-    $('fbSend').textContent = fbSending ? 'Skickar…' : FB.send;
+    $('fbSend').textContent = fbSending ? txt('sending') : txt('send');
   }
   function resetFeedback() {
     fbRating = 0;
@@ -425,7 +441,7 @@
     function failed() {
       fbSending = false;
       updateFb();
-      setFbError('Något gick fel. Försök igen, eller hoppa över.');
+      setFbError(txt('fbError'));
     }
 
     fetch(PRIZE.endpoint, {
@@ -474,6 +490,42 @@
     Array.prototype.forEach.call($('langs').children, function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
     });
+    applyTexts();
+  }
+
+  // Byter alla fasta texter i sidan till valt språk (se data-t i index.html och window.TEXT)
+  function applyTexts() {
+    document.documentElement.lang = appLang;
+    document.title = txt('pageTitle');
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t]'), function (el) {
+      el.textContent = txt(el.getAttribute('data-t'));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t-aria]'), function (el) {
+      el.setAttribute('aria-label', txt(el.getAttribute('data-t-aria')));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-t-ph]'), function (el) {
+      el.setAttribute('placeholder', txt(el.getAttribute('data-t-ph')));
+    });
+    // Långa namn (t.ex. "Mycelium's biolab") får lite mindre text så att de ryms på en rad
+    document.querySelector('h1').classList.toggle('long', txt('name').length > 15);
+    // Policyraden finns bara på svenska – på övriga språk visas bara länken till policyn
+    $('privacyNote').hidden = !txt('privacy');
+    // Länken till personuppgiftspolicyn
+    if (PRIZE.privacyUrl) {
+      $('privacyMoreText').textContent = txt('privacyMore');
+      $('privacyLink').textContent = txt('privacyLink');
+      $('privacyLink').href = PRIZE.privacyUrl;
+      $('privacyMore').hidden = false;
+    } else {
+      $('privacyMore').hidden = true;
+    }
+    // Ansiktena i feedbacken
+    var faces = txt('faces') || [];
+    faceBtns.forEach(function (b, i) { b.querySelector('span').textContent = faces[i] || ''; });
+    // Knappar vars text byts under tiden
+    resetBtn.textContent = armed ? txt('resetConfirm') : txt('reset');
+    updateSend();
+    updateFb();
   }
 
   function buildLangButtons() {
@@ -489,6 +541,7 @@
       b.addEventListener('click', function () {
         try { localStorage.setItem(LANG_KEY, k); } catch (e) {}
         renderIntro(k);
+        render(); // rutor, rad under rubriken och knappar byter språk
       });
       $('langs').appendChild(b);
     });
@@ -527,11 +580,10 @@
     var q = byId[openId];
     var T = q && tr(q);
     if (!T || !T.note || noteOpen) return;
-    var L = INTRO[appLang] || {};
     noteOpen = true;
     noteFocus = document.activeElement;
     noteEl.lang = appLang;
-    $('nvTitle').textContent = L.noteTitle || '';
+    $('nvTitle').textContent = txt('noteTitle');
     var box = $('nvText');
     box.textContent = '';
     T.note.forEach(function (line) {
@@ -539,7 +591,7 @@
       p.textContent = line;
       box.appendChild(p);
     });
-    $('nvClose').textContent = L.noteClose || 'OK';
+    $('nvClose').textContent = txt('noteClose') || 'OK';
     noteEl.hidden = false;
     void noteEl.offsetWidth; // gör att inglidningen startar
     noteEl.classList.add('open');
@@ -557,11 +609,11 @@
 
   /* ---------- Börja om (två tryck så det inte sker av misstag) ---------- */
   var armed = false, armTimer = null;
-  function disarm() { armed = false; resetBtn.textContent = 'Börja om'; }
+  function disarm() { armed = false; resetBtn.textContent = txt('reset'); }
   resetBtn.addEventListener('click', function () {
     if (!armed) {
       armed = true;
-      resetBtn.textContent = 'Tryck igen för att börja om';
+      resetBtn.textContent = txt('resetConfirm');
       armTimer = setTimeout(disarm, 5000);
       return;
     }
@@ -594,7 +646,7 @@
   $('prizeForm').addEventListener('change', updateSend);
   emailInput.addEventListener('blur', function () {
     var v = emailInput.value.trim();
-    if (v && !emailOk(v)) setError('Kontrollera e-postadressen.');
+    if (v && !emailOk(v)) setError(txt('emailError'));
   });
   emailInput.addEventListener('input', function () {
     if (!formError.hidden && emailOk(emailInput.value.trim())) setError('');
@@ -619,34 +671,12 @@
   $('introGo').addEventListener('click', closeIntro);
   introEl.addEventListener('click', function (e) { if (e.target === introEl) closeIntro(); });
 
-  if (prizeOn) {
-    $('prizeTitle').textContent = PRIZE.title;
-    $('prizeIntro').textContent = PRIZE.intro;
-    $('consentText').textContent = PRIZE.consent;
-    $('privacyNote').textContent = PRIZE.privacy;
-    if (PRIZE.privacyUrl) {
-      $('privacyMoreText').textContent = PRIZE.privacyMore;
-      $('privacyLink').textContent = PRIZE.privacyLinkText;
-      $('privacyLink').href = PRIZE.privacyUrl;
-    } else {
-      $('privacyMore').hidden = true;
-    }
-  }
-
-  if (FB) {
-    $('fbTitle').textContent = FB.title;
-    $('fbTextLabel').textContent = FB.commentLabel;
-    $('fbNote').textContent = FB.note;
-    $('fbSkip').textContent = FB.skip;
-    faceBtns.forEach(function (b, i) { b.querySelector('span').textContent = FB.faces[i] || ''; });
-    updateFb();
-  }
-
   if (INTRO) {
     buildLangButtons();
-    renderIntro(pickLang());
+    renderIntro(pickLang()); // väljer språk och sätter alla texter
   } else {
     $('help').hidden = true;
+    applyTexts();
   }
 
   load();
