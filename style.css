@@ -354,30 +354,32 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
   transition: transform .3s ease;
 }
 .intro.open .intro-note { transform: rotate(-.6deg); }
+.langs { grid-column: 1 / -1; display: flex; gap: 8px; margin: 0 0 14px; }
+.lang {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 2.5px solid var(--ink);
+  border-radius: 12px 9px 13px 10px / 10px 13px 9px 12px;
+  background: rgba(255, 253, 246, .72);
+  box-shadow: 0 2px 0 rgba(28, 23, 13, .85);
+  font-family: var(--heading);
+  font-size: 19px;
+  line-height: 1;
+  text-transform: uppercase;
+  transition: background .15s, color .15s;
+}
+.lang[aria-pressed="true"] { background: var(--ink); color: #fff; }
 .intro-prof {
-  grid-row: 1;
+  grid-row: 2;
   align-self: end;
   width: 104px;
   height: auto;
   filter: drop-shadow(4px 6px 5px rgba(40, 28, 0, .45));
   pointer-events: none;
 }
-.intro-title { margin: 0; font-size: clamp(30px, 9vw, 38px); line-height: 1; }
-.intro-lead { margin: 8px 0 0; font-size: 21px; line-height: 1.15; }
-.steps { list-style: none; counter-reset: step; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
-.steps li { counter-increment: step; display: flex; gap: 10px; align-items: flex-start; font-size: 20px; line-height: 1.15; }
-.steps b { font-family: var(--heading); font-weight: 400; font-size: 1.25em; line-height: 1; letter-spacing: .02em; text-transform: uppercase; }
-.steps li::before {
-  content: counter(step);
-  flex: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--ink);
-  color: #fff;
-  font: 400 22px/31px var(--heading);
-  text-align: center;
-}
+.intro-body { align-self: center; }
+.intro-title { margin: 0; font-size: clamp(28px, 8vw, 33px); line-height: 1.02; }
+.intro-lead { margin: 14px 0 0; font-size: 26px; line-height: 1.1; }
 .intro-more {
   grid-column: 1 / -1;
   margin: 14px 0 0;
@@ -393,13 +395,12 @@ h1 { margin: 4px 0 0; font-size: clamp(40px, 13.5vw, 58px); line-height: .92; }
 /* Kompaktare på små telefoner så att allt ryms utan scroll */
 @media (max-width: 380px), (max-height: 720px) {
   .intro { padding: 10px; }
+  .langs { margin-bottom: 10px; }
+  .lang { min-height: 32px; padding: 0 11px; font-size: 17px; }
   .intro-note { grid-template-columns: 80px 1fr; gap: 0 10px; padding: 16px 14px 14px; }
   .intro-prof { width: 80px; }
-  .intro-title { font-size: 30px; }
-  .intro-lead { margin-top: 6px; font-size: 18px; }
-  .steps { margin-top: 10px; gap: 7px; }
-  .steps li { font-size: 17px; gap: 8px; }
-  .steps li::before { width: 26px; height: 26px; font-size: 19px; line-height: 27px; }
+  .intro-title { font-size: 25px; }
+  .intro-lead { margin-top: 10px; font-size: 21px; }
   .intro-more { margin-top: 10px; padding-top: 8px; font-size: 15px; }
   .intro .cta { height: 56px; margin-top: 10px; font-size: 28px; }
 }

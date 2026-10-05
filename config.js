@@ -1,18 +1,32 @@
 // Texter och inställningar. Redigera här.
 
 // Kort introduktion som visas när man öppnar sidan första gången
-// (och när man trycker på ? uppe till höger).
+// (och när man trycker på ? uppe till höger). Finns på svenska, danska och norska.
+// Första språket är standard. Besökare vars telefon är inställd på danska eller norska
+// får det språket direkt, och valet av språk kommer ihåg på telefonen.
+//   title = den stora texten, lead = frågan, more = raden under strecket.
 window.INTRO = {
-  title: 'Hjälp Professor Mycel!',
-  lead: 'Orden har försvunnit ur professorns sista anteckningar. Vilka ord saknas?',
-  // *Stjärnor* runt ett ord gör det fetare, så att man ser stegets verb direkt.
-  steps: [
-    '*Läs* ledtrådarna vid bordet.',
-    '*Lyft* luckan med rätt symbol.',
-    '*Tryck* på symbolen här och välj ordet.'
-  ],
-  more: 'Mer om professorns experiment finns på den stora tavlan på väggen.',
-  button: 'Börja'
+  sv: {
+    label: 'Svenska',
+    title: 'Hjälp professor Mycel att avsluta sina anteckningar.',
+    lead: 'Vilka ord saknas i de sex experimenten?',
+    more: 'Behöver du mer information, läs på den stora tavlan på väggen.',
+    button: 'Börja'
+  },
+  da: {
+    label: 'Dansk',
+    title: 'Hjælp professor Mycel med at afslutte sine notater.',
+    lead: 'Hvilke ord mangler i de seks eksperimenter?',
+    more: 'Har du brug for mere information, kan du læse på den store tavle på væggen.',
+    button: 'Start'
+  },
+  no: {
+    label: 'Norsk',
+    title: 'Hjelp professor Mycel med å avslutte notatene sine.',
+    lead: 'Hvilke ord mangler i de seks eksperimentene?',
+    more: 'Trenger du mer informasjon, kan du lese på den store tavlen på veggen.',
+    button: 'Start'
+  }
 };
 
 // Utlottning och feedback.

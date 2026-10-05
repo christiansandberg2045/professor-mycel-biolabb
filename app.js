@@ -24,7 +24,10 @@
   var prizeOn = !!PRIZE.endpoint;
   var FB = prizeOn && PRIZE.feedback && PRIZE.feedback.enabled ? PRIZE.feedback : null;
   var INTRO = window.INTRO || null;
+  // Äldre config med en enda text (utan språk) räknas som svenska
+  if (INTRO && INTRO.title) INTRO = { sv: Object.assign({ label: 'Svenska' }, INTRO) };
   var INTRO_KEY = 'mycel-intro-v1';
+  var LANG_KEY = 'mycel-lang-v1';
   var openId = null;
   var closing = false;
   var lastFocus = null;
@@ -403,9 +406,56 @@
       .then(function () { clearTimeout(timeout); });
   }
 
-  /* ---------- Introduktion: kort förklaring när man öppnar sidan ---------- */
+  /* ---------- Introduktion: kort förklaring när man öppnar sidan (svenska, danska, norska) ---------- */
   var introEl = $('intro');
   var introOpen = false;
+  var introLang = '';
+
+  // Språk: det man valt sist, annars telefonens språk (danska/norska), annars det första i config.js
+  function pickLang() {
+    var keys = Object.keys(INTRO);
+    try {
+      var saved = localStorage.getItem(LANG_KEY);
+      if (saved && INTRO[saved]) return saved;
+    } catch (e) {}
+    var nav = String((navigator.languages && navigator.languages[0]) || navigator.language || '')
+      .toLowerCase().slice(0, 2);
+    var byPhone = { sv: 'sv', da: 'da', nb: 'no', nn: 'no', no: 'no' }[nav];
+    return byPhone && INTRO[byPhone] ? byPhone : keys[0];
+  }
+
+  function renderIntro(lang) {
+    var t = INTRO[lang];
+    if (!t) return;
+    introLang = lang;
+    $('introNote').lang = lang;
+    $('introTitle').textContent = t.title;
+    $('introLead').textContent = t.lead;
+    $('introMore').textContent = t.more;
+    $('introGo').textContent = t.button;
+    Array.prototype.forEach.call($('langs').children, function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
+    });
+  }
+
+  function buildLangButtons() {
+    var keys = Object.keys(INTRO);
+    if (keys.length < 2) { $('langs').hidden = true; return; }
+    keys.forEach(function (k) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'lang';
+      b.lang = k;
+      b.setAttribute('data-lang', k);
+      b.textContent = INTRO[k].label || k.toUpperCase();
+      b.addEventListener('click', function () {
+        try { localStorage.setItem(LANG_KEY, k); } catch (e) {}
+        renderIntro(k);
+      });
+      $('langs').appendChild(b);
+    });
+  }
+
   function introSeen() {
     try { var t = +localStorage.getItem(INTRO_KEY); return !!t && Date.now() - t < MAX_AGE; } catch (e) { return false; }
   }
@@ -512,22 +562,8 @@
   }
 
   if (INTRO) {
-    $('introTitle').textContent = INTRO.title;
-    $('introLead').textContent = INTRO.lead;
-    $('introMore').textContent = INTRO.more;
-    $('introGo').textContent = INTRO.button;
-    INTRO.steps.forEach(function (s) {
-      var li = document.createElement('li');
-      var text = document.createElement('span');
-      parts(s).forEach(function (seg, i) {   // udda delar (mellan stjärnor) blir fetstil
-        if (!seg) return;
-        var n = document.createElement(i % 2 ? 'b' : 'span');
-        n.textContent = seg;
-        text.appendChild(n);
-      });
-      li.appendChild(text);
-      $('introSteps').appendChild(li);
-    });
+    buildLangButtons();
+    renderIntro(pickLang());
   } else {
     $('help').hidden = true;
   }
