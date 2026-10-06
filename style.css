@@ -20,6 +20,13 @@
   font-display: block;
 }
 @font-face {
+  font-family: "Special Elite";
+  src: url("assets/fonts/SpecialElite-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
   font-family: "GFY Marcie";
   src: url("assets/fonts/GFY-Marcie.otf") format("opentype");
   font-weight: 400;
@@ -38,6 +45,7 @@
   --display: "GFY Woodward", "Arial Narrow", Impact, sans-serif;
   --hand: "GFY Kersti", "Marker Felt", "Comic Sans MS", cursive;
   --script: "GFY Marcie", "Snell Roundhand", cursive;
+  --type: "Special Elite", "American Typewriter", "Courier New", monospace;
   --box: 14px 18px 12px 17px / 17px 12px 18px 14px;
 }
 
@@ -565,6 +573,7 @@ h1.long { font-size: clamp(30px, 11.2vw, 50px); } /* längre namn, t.ex. "Myceli
 .wall-card { max-width: 480px; }
 .wall-h { margin: 0 0 8px; font-family: var(--heading); font-size: 24px; line-height: 1.05; text-align: center; }
 .wall-info p, .wall-notes p { margin: 0 0 9px; font-size: 19px; line-height: 1.18; }
+#wvWelcome p { font-family: var(--type); font-size: 15px; line-height: 1.32; margin-bottom: 8px; }
 .wall-info { padding-bottom: 14px; border-bottom: 2.5px dashed rgba(28, 23, 13, .35); }
 .wall-notes { padding-top: 14px; }
 .wall-info .wall-warning {
@@ -629,6 +638,7 @@ h1.long { font-size: clamp(30px, 11.2vw, 50px); } /* längre namn, t.ex. "Myceli
   .nv-text p { font-size: 20px; margin-bottom: 8px; }
   .wall-h { font-size: 21px; }
   .wall-info p, .wall-notes p { font-size: 17px; margin-bottom: 7px; }
+  #wvWelcome p { font-size: 14px; margin-bottom: 7px; }
   .wall-lines li { font-size: 18px; gap: 10px; }
   .wall-lines img { width: 42px; height: 42px; }
   .nv-sign { font-size: 22px; margin-top: 8px; }

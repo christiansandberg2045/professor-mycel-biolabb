@@ -6,7 +6,7 @@
 // får det språket direkt, och valet av språk kommer ihåg på telefonen. Engelska väljs
 // aldrig automatiskt (många svenska telefoner står på engelska) – man trycker på språket.
 //   title = den stora texten, lead = frågan, more = raden under strecket.
-//   board = knappen under raden på danska/norska/engelska; den visar tavlans text översatt (wall.js).
+//   board = knappen på danska/norska/engelska; den visar tavlans text på det språket (wall.js).
 // Språket som väljs här styr hela appen: alla övriga texter finns i window.TEXT längre ner,
 // och översättningarna av uppgifterna ligger i quiz.js. Professorns namn är Mycel (svenska,
 // danska, norska) och Mycelium (engelska). Personuppgiftspolicyn översätts inte – den länkas bara.
@@ -23,7 +23,7 @@ window.INTRO = {
     title: 'Hjælp professor Mycel med at afslutte sine notater.',
     lead: 'Hvilke ord mangler i de seks eksperimenter?',
     more: 'Har du brug for mere information?',
-    board: 'Læs tavlen',
+    board: 'Læs på dansk',
     button: 'Start'
   },
   no: {
@@ -31,7 +31,7 @@ window.INTRO = {
     title: 'Hjelp professor Mycel med å avslutte notatene sine.',
     lead: 'Hvilke ord mangler i de seks eksperimentene?',
     more: 'Trenger du mer informasjon?',
-    board: 'Les tavlen',
+    board: 'Les på norsk',
     button: 'Start'
   },
   en: {
@@ -39,7 +39,7 @@ window.INTRO = {
     title: 'Help professor Mycelium complete the notes.',
     lead: 'Which words are missing in the six experiments?',
     more: 'Need more information?',
-    board: 'Read the board',
+    board: 'Read in English',
     button: 'Start'
   }
 };
