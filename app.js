@@ -24,6 +24,7 @@
   var prizeOn = !!PRIZE.endpoint;
   var FB = prizeOn && PRIZE.feedback && PRIZE.feedback.enabled ? PRIZE.feedback : null;
   var INTRO = window.INTRO || null;
+  var WALL = window.WALL || {};
   // Äldre config med en enda text (utan språk) räknas som svenska
   if (INTRO && INTRO.title) INTRO = { sv: Object.assign({ label: 'Svenska' }, INTRO) };
   var INTRO_KEY = 'mycel-intro-v1';
@@ -486,6 +487,9 @@
     $('introTitle').textContent = t.title;
     $('introLead').textContent = t.lead;
     $('introMore').textContent = t.more;
+    // Tavlans text finns översatt (wall.js) för danska, norska och engelska – på svenska är det originalet på väggen
+    $('introBoard').textContent = t.board || '';
+    $('introBoard').hidden = !(WALL[lang] && t.board);
     $('introGo').textContent = t.button;
     Array.prototype.forEach.call($('langs').children, function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
@@ -607,6 +611,75 @@
     }, 250);
   }
 
+  /* ---------- Tavlan på väggen, översatt (knappen i introduktionen) ---------- */
+  var wallEl = $('wallview');
+  var wallOpen = false;
+  var wallFocus = null;
+
+  function addParas(box, list) {
+    box.textContent = '';
+    (list || []).forEach(function (line) {
+      var p = document.createElement('p');
+      p.textContent = line;
+      box.appendChild(p);
+    });
+  }
+  // "uten {4} dør de." → text med en tom rad (4 eller 6 tecken lång) där ordet saknas
+  function fillBlanks(el, text) {
+    text.split(/(\{\d+\})/).forEach(function (part) {
+      var m = /^\{(\d+)\}$/.exec(part);
+      if (!m) { if (part) el.appendChild(document.createTextNode(part)); return; }
+      var b = document.createElement('span');
+      b.className = 'blank';
+      b.style.setProperty('--n', m[1]);
+      b.setAttribute('aria-label', '…');
+      el.appendChild(b);
+    });
+  }
+
+  function openWall() {
+    var W = WALL[appLang];
+    if (!W || wallOpen) return;
+    wallOpen = true;
+    wallFocus = document.activeElement;
+    wallEl.lang = appLang;
+    $('wvTitle').textContent = W.title;
+    $('wvWelcomeTitle').textContent = W.welcomeTitle;
+    addParas($('wvWelcome'), W.welcome);
+    $('wvWarning').textContent = W.warning;
+    $('wvNotesTitle').textContent = W.notesTitle;
+    addParas($('wvNotes'), W.notes);
+    var ul = $('wvLines');
+    ul.textContent = '';
+    (W.lines || []).forEach(function (row) {
+      var li = document.createElement('li');
+      var img = document.createElement('img');
+      img.src = 'assets/img/symbols/' + row[0] + '.png';
+      img.alt = '';
+      var span = document.createElement('span');
+      fillBlanks(span, row[1]);
+      li.appendChild(img);
+      li.appendChild(span);
+      ul.appendChild(li);
+    });
+    addParas($('wvNotesEnd'), W.notesEnd);
+    $('wvClose').textContent = txt('noteClose') || 'OK';
+    wallEl.scrollTop = 0;
+    wallEl.hidden = false;
+    void wallEl.offsetWidth; // gör att inglidningen startar
+    wallEl.classList.add('open');
+    $('wvClose').focus({ preventScroll: true });
+  }
+  function closeWall() {
+    if (!wallOpen) return;
+    wallOpen = false;
+    wallEl.classList.remove('open');
+    setTimeout(function () {
+      wallEl.hidden = true;
+      if (wallFocus && wallFocus.focus) wallFocus.focus({ preventScroll: true });
+    }, 250);
+  }
+
   /* ---------- Börja om (två tryck så det inte sker av misstag) ---------- */
   var armed = false, armTimer = null;
   function disarm() { armed = false; resetBtn.textContent = txt('reset'); }
@@ -636,6 +709,7 @@
   picker.addEventListener('click', function (e) { if (e.target === picker) closePicker(); });
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
+    if (wallOpen) { closeWall(); return; }
     if (noteOpen) { closeNote(); return; }
     closePicker();
     closeIntro();
@@ -666,6 +740,10 @@
   $('pInfo').addEventListener('click', openNote);
   $('nvClose').addEventListener('click', closeNote);
   noteEl.addEventListener('click', function (e) { if (e.target === noteEl) closeNote(); });
+
+  $('introBoard').addEventListener('click', openWall);
+  $('wvClose').addEventListener('click', closeWall);
+  wallEl.addEventListener('click', function (e) { if (e.target === wallEl) closeWall(); });
 
   $('help').addEventListener('click', openIntro);
   $('introGo').addEventListener('click', closeIntro);

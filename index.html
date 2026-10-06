@@ -122,6 +122,25 @@
   </div>
 </div>
 
+<div class="noteview wallview" id="wallview" hidden>
+  <div class="noteview-card wall-card" role="dialog" aria-modal="true" aria-labelledby="wvTitle">
+    <h2 class="nv-title display" id="wvTitle"></h2>
+    <section class="wall-info">
+      <h3 class="wall-h" id="wvWelcomeTitle"></h3>
+      <div id="wvWelcome"></div>
+      <p class="wall-warning" id="wvWarning"></p>
+    </section>
+    <section class="wall-notes">
+      <h3 class="wall-h" id="wvNotesTitle"></h3>
+      <div id="wvNotes"></div>
+      <ul class="wall-lines" id="wvLines"></ul>
+      <div id="wvNotesEnd"></div>
+      <p class="nv-sign" data-t="signature">– Professor Mycel</p>
+    </section>
+    <button class="cta display" id="wvClose" type="button"></button>
+  </div>
+</div>
+
 <div class="intro" id="intro" hidden>
   <div class="intro-note" id="introNote" role="dialog" aria-modal="true" aria-labelledby="introTitle">
     <div class="langs" id="langs" role="group" aria-label="Språk" data-t-aria="langGroup"></div>
@@ -130,13 +149,17 @@
       <h2 class="intro-title display" id="introTitle"></h2>
       <p class="intro-lead" id="introLead"></p>
     </div>
-    <p class="intro-more" id="introMore"></p>
+    <div class="intro-more">
+      <p id="introMore"></p>
+      <button class="board-btn display" id="introBoard" type="button" hidden></button>
+    </div>
     <button class="cta display" id="introGo" type="button"></button>
   </div>
 </div>
 
 <script src="quiz.js"></script>
 <script src="config.js"></script>
+<script src="wall.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
