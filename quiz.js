@@ -51,13 +51,13 @@ window.QUIZ = [
     title: 'Mögel i skafferiet',
     symbol: 'brodskiva',
     question: 'Vad behöver möglet ur luften för att växa?',
-    options: ['SYRE', 'KUL', 'ARSENIK'],
+    options: ['SYRE', 'SÅPBUBBLOR', 'ARSENIK'],
     answer: 0,
     i18n: {
       da: {
         title: 'Skimmel i spisekammeret',
         question: 'Hvad har skimmelsvampen brug for fra luften for at vokse?',
-        options: ['ILT', 'SJOV', 'ARSEN'],
+        options: ['ILT', 'SÆBEBOBLER', 'ARSEN'],
         note: [
           'Samme brød. Samme temperatur. Samme tid.',
           'Alligevel vokser den grønne skimmel forskelligt.',
@@ -68,7 +68,7 @@ window.QUIZ = [
       no: {
         title: 'Mugg i spiskammeret',
         question: 'Hva trenger muggsoppen fra luften for å vokse?',
-        options: ['OKSYGEN', 'MORO', 'ARSEN'],
+        options: ['OKSYGEN', 'SÅPEBOBLER', 'ARSEN'],
         note: [
           'Samme brød. Samme temperatur. Samme tid.',
           'Likevel vokser den grønne muggen ulikt.',
@@ -79,7 +79,7 @@ window.QUIZ = [
       en: {
         title: 'Mold in the Pantry',
         question: 'What does mold need from the air to grow?',
-        options: ['OXYGEN', 'FUN', 'ARSENIC'],
+        options: ['OXYGEN', 'SOAP BUBBLES', 'ARSENIC'],
         note: [
           'Same bread. Same temperature. Same time.',
           'Yet the green mold grows better on some than on others.',
@@ -94,13 +94,13 @@ window.QUIZ = [
     title: 'Slemsvampslabyrinten',
     symbol: 'labyrint',
     question: 'Vad söker slemsvampen sig till?',
-    options: ['SALT', 'LJUS', 'NÄRING'],
+    options: ['SALTKARET', 'LJUS', 'NÄRING'],
     answer: 2,
     i18n: {
       da: {
         title: 'Slimsvampelabyrinten',
         question: 'Hvad søger slimsvampen hen imod?',
-        options: ['SALT', 'LYS', 'NÆRING'],
+        options: ['SALTKARRET', 'LYS', 'NÆRING'],
         note: [
           'Ingen svamp. Ingen hjerne. Ingen mund. Ingen øjne.',
           'Alligevel finder den og vælger en vej …',
@@ -110,7 +110,7 @@ window.QUIZ = [
       no: {
         title: 'Slimsopplabyrinten',
         question: 'Hva søker slimsoppen seg til?',
-        options: ['SALT', 'LYS', 'NÆRING'],
+        options: ['SALTKARET', 'LYS', 'NÆRING'],
         note: [
           'Ingen sopp. Ingen hjerne. Ingen munn. Ingen øyne.',
           'Likevel finner den og velger en vei …',
@@ -120,7 +120,7 @@ window.QUIZ = [
       en: {
         title: 'The Slime Mold Maze',
         question: 'What does the slime mold move towards?',
-        options: ['SALT', 'LIGHT', 'NUTRIENTS'],
+        options: ['THE SALT SHAKER', 'LIGHT', 'NUTRIENTS'],
         note: [
           'No fungus. No brain. No mouth. No eyes.',
           'Yet it finds and chooses a path …',
@@ -134,13 +134,13 @@ window.QUIZ = [
     title: 'Det mikroskopiska riket',
     symbol: 'mikroskop',
     question: 'Hur sprider sig svampar?',
-    options: ['SPORER', 'RÖTTER', 'FRÖN', 'MED POSTEN'],
+    options: ['SPORER', 'RÖTTERNA', 'FRÖN', 'BREVBÄRAREN'],
     answer: 0,
     i18n: {
       da: {
         title: 'Det mikroskopiske rige',
         question: 'Hvordan spreder svampe sig?',
-        options: ['SPORER', 'RØDDER', 'FRØ', 'MED POSTEN'],
+        options: ['SPORER', 'RØDDERNE', 'FRØ', 'POSTBUDDET'],
         note: [
           'Med det blotte øje ser jeg næsten ingenting.',
           'Men under linsen skjuler sig det, der spreder svampene videre.'
@@ -149,7 +149,7 @@ window.QUIZ = [
       no: {
         title: 'Det mikroskopiske riket',
         question: 'Hvordan sprer sopp seg?',
-        options: ['SPORER', 'RØTTER', 'FRØ', 'MED POSTEN'],
+        options: ['SPORER', 'RØTTENE', 'FRØ', 'POSTBUDET'],
         note: [
           'Med det blotte øye ser jeg nesten ingenting.',
           'Men under linsen skjuler det seg noe som sprer soppene videre.'
@@ -158,7 +158,7 @@ window.QUIZ = [
       en: {
         title: 'The Microscopic Kingdom',
         question: 'How do fungi spread?',
-        options: ['SPORES', 'ROOTS', 'SEEDS', 'BY MAIL'],
+        options: ['SPORES', 'THE ROOTS', 'SEEDS', 'THE MAIL CARRIER'],
         note: [
           'With the naked eye I see almost nothing.',
           'But under the lens hides what spreads the fungi onward.'
